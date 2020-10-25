@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.myapplication.activity.MainActivity;
@@ -38,12 +39,19 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
         initView();
         initRetrofit();
 
+        TextView register = (TextView)findViewById(R.id.button_register);
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(LoginActivity.this, RegisterActivity2.class);
+                startActivity(i);
+            }
+        });
     }
+
 
     private void initView() {
 
@@ -51,8 +59,6 @@ public class LoginActivity extends AppCompatActivity {
         inputPassword = findViewById(R.id.input_password);
         btnLogin = findViewById(R.id.button_login);
         btnRegister = findViewById(R.id.button_register);
-
-
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -60,12 +66,18 @@ public class LoginActivity extends AppCompatActivity {
                 userName = inputUsername.getText().toString();
                 password = inputPassword.getText().toString();
                 Login login = new Login(userName, password);
-                sendLogin(login);
-
+                if (userName.equals("")){
+                    Toast.makeText(LoginActivity.this, "Username tidak boleh kosong", Toast.LENGTH_SHORT).show();
+                } else if (password.equals("")){
+                    Toast.makeText(LoginActivity.this, "Password tidak boleh kosong", Toast.LENGTH_SHORT).show();
+                } else {
+                    sendLogin(login);
+                }
                 Log.i(TAG, "isi username : " + userName);
                 Log.i(TAG, "isi password : " + password);
             }
         });
+
     }
 
     private void initRetrofit() {

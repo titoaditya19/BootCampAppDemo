@@ -2,6 +2,7 @@ package com.example.myapplication.utlities;
 
 import com.example.myapplication.models.ApiResult;
 import com.example.myapplication.models.Login;
+import com.example.myapplication.models.Register;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -12,4 +13,6 @@ public interface UserApiService {
     @POST("login")
     Call<ApiResult> userLogin(@Body Login loginBody);
 
+    @POST("register")
+    Call<ApiResult> userRegister(@Body Register registerBody);
 }
