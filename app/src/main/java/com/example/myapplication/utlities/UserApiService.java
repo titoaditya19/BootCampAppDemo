@@ -13,6 +13,6 @@ public interface UserApiService {
     @POST("login")
     Call<ApiResult> userLogin(@Body Login loginBody);
 
-    @POST("register")
+    @POST("users/register")
     Call<ApiResult> userRegister(@Body Register registerBody);
 }

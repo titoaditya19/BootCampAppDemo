@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,11 +10,22 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.myapplication.activity.MainActivity;
+import com.example.myapplication.models.ApiResult;
+import com.example.myapplication.models.Login;
 import com.example.myapplication.models.Register;
+import com.example.myapplication.utlities.Const;
+import com.example.myapplication.utlities.UserApiService;
 
 import java.util.regex.Pattern;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RegisterActivity2 extends AppCompatActivity {
 
@@ -29,6 +41,7 @@ public class RegisterActivity2 extends AppCompatActivity {
         setContentView(R.layout.activity_register2);
 
         initView();
+        initRetrofit();
     }
 
     public final Pattern EMAIL_ADDRESS_PATTERN = Pattern.compile(
@@ -82,6 +95,7 @@ public class RegisterActivity2 extends AppCompatActivity {
                     Toast.makeText(RegisterActivity2.this, "Re Password tidak sama dengan Password", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(RegisterActivity2.this, "BERHASILLL", Toast.LENGTH_SHORT).show();
+                    sendRegister(register);
                 }
 
             } catch (Exception e){
@@ -89,5 +103,49 @@ public class RegisterActivity2 extends AppCompatActivity {
             }
         }
         });
+    }
+
+    private void initRetrofit() {
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(); //intercept semua log http
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient client = new OkHttpClient
+                .Builder()
+                .addInterceptor(interceptor)
+                .build();
+
+        retrofit = new Retrofit.Builder()
+                .baseUrl(Const.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build();
+    }
+
+    private void sendRegister(Register registerBody) {
+        UserApiService userApiService = retrofit.create(UserApiService.class);  //instansiasi interfacenya ke retrofit
+        Call<ApiResult> result = userApiService.userRegister(registerBody);   // call method interfacenya
+
+        result.enqueue(new Callback<ApiResult>() {
+            @Override
+            public void onResponse(Call<ApiResult> call, Response<ApiResult> response) {
+                ApiResult apiResponse = response.body();
+                boolean success = apiResponse.isSuccess();
+                if (success) {
+                    Toast.makeText(RegisterActivity2.this, "Berhasil Register, Silakan Login", Toast.LENGTH_SHORT).show();
+                    toMainActivity();
+                } else {
+                    Toast.makeText(RegisterActivity2.this, apiResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<ApiResult> call, Throwable t) {
+                Toast.makeText(RegisterActivity2.this, "Error : " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private void toMainActivity(){
+        Intent intent = new Intent(RegisterActivity2.this, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 }
