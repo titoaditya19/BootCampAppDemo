@@ -10,12 +10,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.myapplication.activity.MainActivity;
 import com.example.myapplication.models.ApiResult;
-import com.example.myapplication.models.Login;
 import com.example.myapplication.models.Register;
 import com.example.myapplication.utlities.Const;
-import com.example.myapplication.utlities.UserApiService;
+import com.example.myapplication.interface1.UserApiService;
 
 import java.util.regex.Pattern;
 

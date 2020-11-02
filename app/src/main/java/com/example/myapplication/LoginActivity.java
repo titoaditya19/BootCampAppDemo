@@ -14,8 +14,11 @@ import android.widget.Toast;
 import com.example.myapplication.activity.MainActivity;
 import com.example.myapplication.models.ApiResult;
 import com.example.myapplication.models.Login;
+import com.example.myapplication.models.Person;
+import com.example.myapplication.utlities.AppService;
 import com.example.myapplication.utlities.Const;
-import com.example.myapplication.utlities.UserApiService;
+import com.example.myapplication.interface1.UserApiService;
+import com.google.gson.Gson;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -106,7 +109,11 @@ public class LoginActivity extends AppCompatActivity {
                 ApiResult apiResponse = response.body();
                 boolean success = apiResponse.isSuccess();
                 if (success) {
+                    Gson gson = new Gson();
                     Toast.makeText(LoginActivity.this, "Selamat Datang", Toast.LENGTH_SHORT).show();
+                    Person personResult = gson.fromJson(gson.toJson(apiResponse.getData()), Person.class);
+                    AppService.setToken("Bearer " + apiResponse.getToken());
+                    AppService.setPerson(personResult);
                     toMainActivity();
                 } else {
                     Toast.makeText(LoginActivity.this, apiResponse.getMessage(), Toast.LENGTH_SHORT).show();

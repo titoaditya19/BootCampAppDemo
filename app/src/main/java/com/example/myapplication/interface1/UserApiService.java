@@ -1,4 +1,4 @@
-package com.example.myapplication.utlities;
+package com.example.myapplication.interface1;
 
 import com.example.myapplication.models.ApiResult;
 import com.example.myapplication.models.Login;
