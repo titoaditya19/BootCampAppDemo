@@ -13,6 +13,7 @@ import com.example.myapplication.R;
 import com.example.myapplication.RegisterActivity2;
 import com.example.myapplication.models.Person;
 import com.example.myapplication.models.PersonImage;
+import com.google.android.material.tabs.TabLayout;
 
 public class MainActivity extends AppCompatActivity {
 private PersonImage personImage;

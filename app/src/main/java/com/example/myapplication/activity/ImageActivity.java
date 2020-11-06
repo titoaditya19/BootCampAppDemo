@@ -3,6 +3,11 @@ package com.example.myapplication.activity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
 import com.example.myapplication.R;
 import com.example.myapplication.RegisterActivity2;
 import com.example.myapplication.interface1.UserApiService;
@@ -14,6 +19,7 @@ import com.example.myapplication.models.Register;
 import com.example.myapplication.utlities.AppService;
 import com.example.myapplication.utlities.Const;
 import com.example.myapplication.utlities.RetrofitUtility;
+import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 
@@ -52,6 +58,7 @@ public class ImageActivity extends AppCompatActivity {
     ImageView mImageView;
     Button mChooseBtn;
     Button btnSave, btnUpdate, btnSetting;
+    TabLayout tab_image, tab_address, tabLayout;
     private String base64Image;
     private String avatar;
     private Long id;
@@ -64,9 +71,33 @@ public class ImageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image);
-        initView();
-        initRetrofit();
-        getAvatar();
+//        initView();
+//        initRetrofit();
+//        getAvatar();
+
+        TabLayout tabLayout = findViewById(R.id.tabLayout);
+        TabItem tabImage = findViewById(R.id.tab_image);
+        TabItem tabAddress = findViewById(R.id.tab_address);
+        ViewPager viewPager = findViewById(R.id.viewPager);
+
+        PagerAdapter pagerAdapter = new PageAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
+        viewPager.setAdapter(pagerAdapter);
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
     }
 
     private void initView(){
@@ -75,6 +106,9 @@ public class ImageActivity extends AppCompatActivity {
         mImageView = findViewById(R.id.image_view);
         mChooseBtn = findViewById(R.id.btn_ChooseImage);
         btnUpdate = findViewById(R.id.btn_update);
+        tab_address = findViewById(R.id.tab_address);
+        tab_image = findViewById(R.id.tab_image);
+        tabLayout = findViewById(R.id.tabLayout);
         mChooseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -115,6 +149,7 @@ public class ImageActivity extends AppCompatActivity {
                 updateAvatar(personImage);
             }
         });
+
     }
 
     private void pickImageFromGallery() {
@@ -363,5 +398,20 @@ public class ImageActivity extends AppCompatActivity {
     private void setButtonVisibility(int saveState, int updateState) {
         btnSave.setVisibility(saveState);
         btnUpdate.setVisibility(updateState);
+    }
+
+//    public void openUserAddressFragment() {
+//        Log.e(TAG, "openUserAddressFragment: ");
+//        FragmentManager fragmentManager = getSupportFragmentManager();
+//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//        AddressFragment strCode = new AddressFragment();
+//        fragmentTransaction.replace(R.id.content, strCode, "addressFragment");
+//        fragmentTransaction.commit();
+//    }
+
+    private void toAddressActivity(){
+        Intent intent = new Intent(ImageActivity.this, AddressActivity.class);
+        startActivity(intent);
+        finish();
     }
 }
