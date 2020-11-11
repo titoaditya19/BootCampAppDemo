@@ -14,7 +14,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
         android:usesCleartextTraffic="true">
-        <activity android:name=".activity.AddressActivity"></activity>
+        <activity android:name=".activity.MovieDetailActivity"></activity>
+        <activity android:name=".activity.AddressActivity" />
         <activity android:name=".activity.ImageActivity" />
         <activity android:name=".activity.MainActivity" />
         <activity android:name=".activity.Splash">

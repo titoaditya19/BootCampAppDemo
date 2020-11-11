@@ -1,4 +1,4 @@
-package com.example.myapplication.spinner;
+package com.example.myapplication.adapter;
 
 import android.app.Activity;
 import android.content.Context;

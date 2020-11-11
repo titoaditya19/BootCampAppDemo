@@ -2,6 +2,7 @@ package com.example.myapplication.activity;
 
 import android.content.ClipData;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 
@@ -14,17 +15,25 @@ import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.myapplication.LoginActivity;
 import com.example.myapplication.R;
+import com.example.myapplication.RegisterActivity2;
 import com.example.myapplication.interface1.UserAddressService;
+import com.example.myapplication.interface1.UserApiService;
 import com.example.myapplication.interface1.UserImageService;
 import com.example.myapplication.models.ApiResult;
 import com.example.myapplication.models.District;
+import com.example.myapplication.models.Person;
+import com.example.myapplication.models.PersonImage;
 import com.example.myapplication.models.Province;
 import com.example.myapplication.models.Regencies;
+import com.example.myapplication.models.UserAddress;
 import com.example.myapplication.models.Village;
 import com.example.myapplication.utlities.AppService;
 import com.example.myapplication.utlities.DialogUtility;
@@ -43,27 +52,130 @@ import retrofit2.Retrofit;
 
 public class AddressFragment extends Fragment {
     private String TAG = "userAddressFragment";
-    private View view;
+    private String person_id, address, province_id, regency_id, district_id, village_id, postalCode;
+    private View addressView, addressDataView;
     private Retrofit retrofit;
     private Spinner spinnerProvince, spinnerRegencies, spinnerDistrict, spinnerVillage;
+    private EditText inputAddress, inputPostalCode;
+    private Button btnSave;
+    private int provinceId, regencyId, districtId, villageId;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_address, container, false);
+        addressView = inflater.inflate(R.layout.fragment_address, container, false);
+        addressDataView = inflater.inflate(R.layout.fragment_addressdata, container, false);
         initView();
 
-        return view;
+        return addressView;
     }
 
     public void initView() {
         retrofit = RetrofitUtility.initializeRetrofit();
 
-        spinnerProvince = view.findViewById(R.id.spin_provinces);
-        spinnerRegencies = view.findViewById(R.id.spin_regencie);
-        spinnerDistrict = view.findViewById(R.id.spin_district);
-        spinnerVillage = view.findViewById(R.id.spin_villages);
+        btnSave = addressView.findViewById(R.id.btnSaveAddress);
+        inputAddress = addressView.findViewById(R.id.txtAlamat);
+        inputPostalCode = addressView.findViewById(R.id.txtPostalCode);
+        spinnerProvince = addressView.findViewById(R.id.spin_provinces);
+        spinnerRegencies = addressView.findViewById(R.id.spin_regencie);
+        spinnerDistrict = addressView.findViewById(R.id.spin_district);
+        spinnerVillage = addressView.findViewById(R.id.spin_villages);
+        getAddress();
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "onClick: Button save ditekan");
+                address = inputAddress.getText().toString();
+                province_id = String.valueOf(provinceId);
+                regency_id = String.valueOf(regencyId);
+                district_id = String.valueOf(districtId);
+                village_id = String.valueOf(villageId);
 
-        getProvince();
+                postalCode = inputPostalCode.getText().toString();
+                person_id = AppService.getPerson().getId().toString();
+                getAddress();
+                UserAddress userAddressBody = new UserAddress(person_id, address, postalCode, province_id, regency_id, district_id, village_id);
+                try {
+                    if (address.equals("")) {
+                        Toast.makeText(getContext(), "Alamat tidak boleh kosong", Toast.LENGTH_SHORT).show();
+                    } else if (province_id.isEmpty()) {
+                        Toast.makeText(getContext(), "Province tidak boleh kosong", Toast.LENGTH_SHORT).show();
+                    } else if (regency_id.isEmpty()) {
+                        Toast.makeText(getContext(), "Regency tidak boleh kurang dari 6 karakter", Toast.LENGTH_SHORT).show();
+                    } else if (district_id.isEmpty()) {
+                        Toast.makeText(getContext(), "District tidak boleh kosong", Toast.LENGTH_SHORT).show();
+                    }else if (village_id.isEmpty()) {
+                        Toast.makeText(getContext(), "Village tidak boleh kosong", Toast.LENGTH_SHORT).show();
+                    }else if (postalCode.equals("")) {
+                        Toast.makeText(getContext(), "Postal Code tidak boleh kosong", Toast.LENGTH_SHORT).show();
+                    } else {
+                        saveAddress(userAddressBody);
+                    }
+                } catch (Exception e) {
+
+                }
+            }
+        });
+
+    }
+
+    private void getAddress(){
+        UserAddressService userAddressService = retrofit.create(UserAddressService.class);
+        Call<ApiResult> result = userAddressService.getAddressById(AppService.getToken(), AppService.getPerson().getId().toString());
+
+        result.enqueue(new Callback<ApiResult>() {
+            @Override
+            public void onResponse(Call<ApiResult> call, Response<ApiResult> response) {
+                Log.e(TAG, "onResponse:" + response.body());
+                ApiResult apiResult = response.body();
+                Gson gson = new Gson();
+                UserAddress userAddress = gson.fromJson(gson.toJson(apiResult.getData()), UserAddress.class);
+                boolean success = apiResult.isSuccess();
+                if (!success){
+                    getProvince();
+                } else {
+                   setAddress(userAddress);
+                   View view = new View(addressDataView.getContext());
+                   view.showContextMenu();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResult> call, Throwable t) {
+
+            }
+        });
+    }
+
+//    private void toAddressDataFragment(){
+//        Intent fragment = new Intent(addressDataView.getContext());
+//        startActivity(fragment);
+//    }
+
+    private void setAddress(UserAddress userAddressBody){
+        inputAddress.setText(userAddressBody.getAddress());
+
+    }
+
+    private void saveAddress(UserAddress userAddressBody){
+        UserAddressService userAddressService = retrofit.create(UserAddressService.class);  //instansiasi interfacenya ke retrofit
+        Call<ApiResult> result = userAddressService.insertAddress(AppService.getToken(), userAddressBody);   // call method interfacenya
+
+        result.enqueue(new Callback<ApiResult>() {
+            @Override
+            public void onResponse(Call<ApiResult> call, Response<ApiResult> response) {
+                ApiResult apiResponse = response.body();
+                boolean success = apiResponse.isSuccess();
+                if (success) {
+                    Toast.makeText(getContext(), "Berhasil Input Data", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), apiResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<ApiResult> call, Throwable t) {
+                Toast.makeText(getContext(), "Error : " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void getProvince(){
@@ -123,8 +235,7 @@ public class AddressFragment extends Fragment {
                     Log.e(TAG, "pilihan selain itu ");
                     Log.e(TAG, "onItemSelected: " + provinceList.get(Integer.parseInt(selectedId)).getId());
 
-                    int provinceId = provinceList.get(Integer.parseInt(selectedId)).getId();
-
+                    provinceId = provinceList.get(Integer.parseInt(selectedId)).getId();
                     getRegencies(provinceId);
                 }
             }
@@ -191,7 +302,7 @@ public class AddressFragment extends Fragment {
                 } else {
                     Log.e(TAG, "pilihan selain itu ");
 
-                    int regencyId = regenciesList.get(Integer.parseInt(selectedId)).getId();
+                    regencyId = regenciesList.get(Integer.parseInt(selectedId)).getId();
 
                     Log.e(TAG, "onItemSelected: " + regencyId);
 
@@ -260,7 +371,7 @@ public class AddressFragment extends Fragment {
                     Log.e(TAG, "onItemSelected: " + null);
                 } else {
                     Log.e(TAG, "pilihan selain itu ");
-                    int districtId = districtList.get(Integer.parseInt(selectedId)).getId();
+                    districtId = districtList.get(Integer.parseInt(selectedId)).getId();
                     Log.e(TAG, "onItemSelected: " + districtId);
                     getVillages(districtId);
                 }
@@ -328,7 +439,7 @@ public class AddressFragment extends Fragment {
                     Log.e(TAG, "onItemSelected: " + null);
                 } else {
                     Log.e(TAG, "pilihan selain itu ");
-                    int villageId = villagesList.get(Integer.parseInt(selectedId)).getId();
+                    villageId = villagesList.get(Integer.parseInt(selectedId)).getId();
                     Log.e(TAG, "onItemSelected: " + villageId);
                 }
             }
@@ -340,5 +451,7 @@ public class AddressFragment extends Fragment {
         });
 
     }
+
+
 
 }
