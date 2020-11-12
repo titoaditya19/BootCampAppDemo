@@ -54,20 +54,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View view = layoutInflater.inflate(R.layout.list_item, parent, false);
         View mainView = layoutInflater.inflate(R.layout.activity_main2, parent, false);
-//        btnDetail = view.findViewById(R.id.buttonDetail);
-//        btnDetail.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                movieDetailActivity.getMovieDetail(getId());
-//                v.getContext().startActivity(new Intent(v.getContext(),MovieDetailActivity.class));
-//            }
-//        });
         return new MovieAdapter.MovieViewHolder(view);
     }
-
-//    public long getId(int position){
-//        return dataList.get(position).getId();
-//    }
 
     @Override
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
@@ -114,9 +102,4 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
         return decodedByte;
     }
-
-//    private void getItemId(){
-//        MovieViewHolder movieViewHolder = null;
-//        btnDetail.getSelectionEnd();
-//    }
 }
